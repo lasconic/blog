@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>Free blog hosting using Ghost, Buster and GitHub Pages</title>
+    <meta name="description" content="" />
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="shortcut icon" href="../favicon.ico">
+
+    <link rel="stylesheet" type="text/css" href="../assets/css/screen.css?v=3be449d276" />
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic|Open+Sans:700,400" />
+
+    <meta name="generator" content="Ghost 0.5" />
+<link rel="alternate" type="application/rss+xml" title="Lasconic&#39;s notes" href="../rss/index.html">
+<link rel="canonical" href="http://blog.lasconic.com/free-blog-hosting-using-ghost-buster-and-github-pages/" />
+</head>
+<body class="post-template tag-ghost-tag tag-nodejs tag-install tag-tutorial">
+
+    
+
+<nav class="main-nav clearfix">
+    <a class="back-button icon-arrow-left" href="http://blog.lasconic.com">Home</a>
+    <a class="subscribe-button icon-feed" href="http://blog.lasconic.com/rss/">Subscribe</a>
+</nav>
+
+<main class="content" role="main">
+
+    <article class="post tag-ghost-tag tag-nodejs tag-install tag-tutorial">
+
+        <header class="post-header">
+            <h1 class="post-title">Free blog hosting using Ghost, Buster and GitHub Pages</h1>
+            <section class="post-meta">
+                <time class="post-date" datetime="2014-09-05">05 September 2014</time>  on <a href="../tag/ghost-tag/index.html">ghost</a>, <a href="../tag/nodejs/index.html"> nodejs</a>, <a href="../tag/install/index.html">install</a>, <a href="../tag/tutorial/index.html">tutorial</a>
+            </section>
+        </header>
+
+        <section class="post-content">
+            <p>I considered several blog engines before starting this blog. First, I wanted  unexpensive and portable solution. Also, I wanted to avoid ads. I considered a self hosted <a href="http://wordpress.org">Wordpress</a> but Wordpress has become a huge and complex pile of code. I'm using Markdown and git daily, so an engine based on them would be nice. I tested <a href="http://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/poole">Hyde and Lanyon</a> and <a href="http://octopress.org/">Octopress</a> but Ruby... no thanks. I prefer Python, so I took a look to <a href="http://getpelican.org">Pelican</a> but it feels less supported. So no good solution...</p>
+
+<p>I came accross <a href="https://ghost.org/download/">Ghost</a> which seems to gain momentum. Ghost lets me write in Markdown syntax and is based on Node.js. The default theme looks good enough and the community support seems ok. Still, I needed a database and a Node.js instance and so a server. I'd prefer to use Github Pages instead, so static HTML pages.</p>
+
+<p><a href="https://github.com/axitkhurana/buster">Buster</a> to the rescue! Buster (Ghost, Buster, <a href="https://www.youtube.com/watch?v=I9bNyDjczVQ#t=12">got it</a>?) is a Python script to extract static content from a running Ghost instance. OK! Sound like a plan.</p>
+
+<h2 id="installingghost">Installing Ghost</h2>
+
+<p>I like to use nvm to manage the version of node I'm running. </p>
+
+<pre><code>$ nvm install 0.10.30
+$ nvm use 0.10.30
+</code></pre>
+
+<p>Then installing Ghost is easy enough. Download the zip from <a href="https://ghost.org/download/">Ghost download page</a>. Unzip it.</p>
+
+<pre><code>$ cd ghost
+$ npm install --production
+</code></pre>
+
+<p>And run it</p>
+
+<pre><code>$ npm start
+$ open 127.0.0.1:2368/ghost/
+</code></pre>
+
+<p>Configure Ghost in the browser.</p>
+
+<h2 id="installingbuster">Installing Buster</h2>
+
+<ul>
+<li>Install <a href="http://pip.readthedocs.org/en/latest/installing.html">pip</a> if necessary. </li>
+<li>Install <a href="https://github.com/axitkhurana/buster">Buster</a></li>
+</ul>
+
+<pre><code>$ pip install buster
+</code></pre>
+
+<h2 id="githubpages">GitHub pages</h2>
+
+<ul>
+<li>Create a new repository on GitHub</li>
+<li><code>cd ghost</code></li>
+<li><code>buster setup</code> and enter repository address</li>
+<li><code>buster add-domain blog.example.com</code></li>
+<li>Modify CNAME of DNS provider. 
+<ul><li>Name: <code>blog</code> </li>
+<li>Value: <code>blog.example.com.</code></li></ul></li>
+</ul>
+
+<h2 id="worflow">Worflow</h2>
+
+<ul>
+<li>Type article in the web interface of Ghost</li>
+<li>When article is ready to be published </li>
+</ul>
+
+<pre><code>    $ buster generate --domain 127.0.0.1:2368
+    $ buster preview
+    $ buster deploy
+</code></pre>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Since you are reading this conclusion, it's running. I still need to pick a theme and add a couple of features I'm missing.</p>
+
+<ul>
+<li>About page</li>
+<li>Syntax hightlighter</li>
+<li>Analytics</li>
+<li>Comments, probably using Discus</li>
+<li>Eventually a search engine but with static websites is not always easy. I will check <a href="http://tapirgo.com/">Tapir</a> and <a href="http://www.tipue.com/search/">Tipue</a></li>
+</ul>
+        </section>
+
+        <footer class="post-footer">
+
+
+            <figure class="author-image">
+                <a class="img" href="../author/lasconic/index.html" style="background-image: url(http://www.gravatar.com/avatar/13235ccd902ea667b2b4353eb74fc812?d=404&amp;s=250)"><span class="hidden">lasconic's Picture</span></a>
+            </figure>
+
+            <section class="author">
+                <h4><a href="../author/lasconic/index.html">lasconic</a></h4>
+
+                    <p>Read <a href="../author/lasconic/index.html">more posts</a> by this author.</p>
+                <div class="author-meta">
+                    
+                    
+                </div>
+            </section>
+
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="https://twitter.com/share?text=Free%20blog%20hosting%20using%20Ghost%2C%20Buster%20and%20GitHub%20Pages&amp;url=http://blog.lasconic.com/free-blog-hosting-using-ghost-buster-and-github-pages/"
+                    onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.lasconic.com/free-blog-hosting-using-ghost-buster-and-github-pages/"
+                    onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://blog.lasconic.com/free-blog-hosting-using-ghost-buster-and-github-pages/"
+                   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+
+        </footer>
+
+    </article>
+
+</main>
+
+
+    <footer class="site-footer clearfix">
+         <section class="copyright"><a href="http://blog.lasconic.com">Lasconic&#x27;s notes</a> &copy; 2014</section>
+         <section class="poweredby">Proudly published with <a href="https://ghost.org">Ghost</a></section>
+    </footer>
+
+    <script src="../public/jquery.js?v=3be449d276"></script>
+
+    <script type="text/javascript" src="../assets/js/jquery.fitvids.js?v=3be449d276"></script>
+    <script type="text/javascript" src="../assets/js/index.js?v=3be449d276"></script>
+
+</body>
+</html>
