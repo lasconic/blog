@@ -659,7 +659,7 @@ margin on the iframe, cause it breaks stuff. */
     letter-spacing: -1px;
     font-weight: 700;
     font-family: "Open Sans", sans-serif;
-    color: #fff;
+    color: #4A4A4A;
 }
 
 .page-description {
@@ -669,7 +669,29 @@ margin on the iframe, cause it breaks stuff. */
     font-weight: 400;
     font-family: "PT Serif", serif;
     letter-spacing: 0;
-    color: rgba(255,255,255,0.8);
+    color: rgba(74,74,74,0.8);
+}
+
+.page-social {
+    margin: 0;
+    font-size: 2.2rem;
+    line-height: 1.5em;
+    font-weight: 400;
+    font-family: "PT Serif", serif;
+    letter-spacing: 0;
+    color: rgba(74,74,74,0.8);
+}
+
+.page-social a {
+    font-size: 1.8rem;
+    display: inline-block;
+    margin: 1rem 1.6rem 1.6rem 0;
+    color: rgba(74,74,74,0.8);
+    text-decoration: none;
+}
+
+.page-social a:hover {
+    color: #50585D;
 }
 
 .no-cover.main-header {
