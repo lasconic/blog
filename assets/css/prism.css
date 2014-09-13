@@ -1,0 +1,130 @@
+/* http://prismjs.com/download.html?themes=prism-funky&languages=markup+css+clike+javascript+java+php+bash+c+cpp+python+go+objectivec */
+/**
+ * prism.js Funky theme
+ * Based on “Polyfilling the gaps” talk slides http://lea.verou.me/polyfilling-the-gaps/
+ * @author Lea Verou
+ */
+
+pre code {
+  overflow: auto;
+  white-space: pre;
+  display: block;
+}
+
+code[class*="language-"],
+pre[class*="language-"] {
+	font-family: Consolas, Monaco, 'Andale Mono', monospace;
+	direction: ltr;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap:normal;
+	line-height: 1.5;
+	font-size: 0.8em;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	overflow: auto;
+	background: #2a2a2a;
+}
+
+code[class*="language-"] {
+	background: #2a2a2a;
+	color: white;
+	overflow: auto;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .2em;
+	border-radius: .3em;
+	box-shadow: none;
+	background: #2a2a2a;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #6f705e;
+}
+
+.token.punctuation {
+	color: #bebec5;
+}
+
+.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol {
+	color: #0cf;
+}
+
+.token.null, 
+.token.operator, 
+.token.boolean, 
+.token.number {
+  color: #a77afe;
+}
+
+.token.char,
+.token.builtin {
+	color: yellow;
+}
+
+
+.token.attr-name, 
+.token.string {
+  color: #e6d06c;
+}
+
+.token.selector {
+  color: #a6e22d;
+}
+
+.token.entity,
+.token.url,
+.language-css .token.string,
+.toke.variable,
+.token.inserted {
+	color: yellowgreen;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+	color: deeppink;
+}
+
+.token.regex,
+.token.important {
+	color: orange;
+}
+
+.token.important {
+	font-weight: bold;
+}
+
+.token.entity {
+	cursor: help;
+}
+
+.token.deleted {
+	color: red;
+}
+
