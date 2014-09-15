@@ -1,0 +1,23 @@
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>blog - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Mon, 15 Sep 2014 09:52:22 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/tag/blog/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>First post, what to expect</title><description>&lt;p&gt;I started several blogs along the years. My last attempt was probably around 2011. I hope this one will last longer! So what to expect from this blog?&lt;/p&gt;
+
+&lt;h2 id="programmingandsoftwarearchitecture"&gt;Programming and software architecture&lt;/h2&gt;
+
+&lt;p&gt;I'm currently the CTO at &lt;a href='http://musescore.com/' &gt;MuseScore&lt;/a&gt;. Primarly, MuseScore is a desktop application written in C++/Qt. I'm also in charge of the development of the MuseScore mobile apps for both iOS and Android. So I will probably write about Qt, QML, C++ and mobile development.&lt;/p&gt;
+
+&lt;p&gt;MuseScore is also two websites &lt;a href='http://musescore.org/' &gt;http://musescore.org&lt;/a&gt; and &lt;a href='http://musescore.com/' &gt;http://musescore.com&lt;/a&gt;. I'm not the webmaster of these two websites, but I did work on the development of both. The two websites are made with &lt;a href='http://drupal.org/' &gt;Drupal&lt;/a&gt; and PHP. In particular, I worked on the &lt;a href='http://developers.musescore.com/' &gt;MuseScore.com API&lt;/a&gt; and on the overall architecture of MuseScore.com running on AWS. So you might expect post about Drupal, PHP, Javascript, Java and AWS services.&lt;/p&gt;
+
+&lt;p&gt;I'm learning Python which is becoming my scripting language of choice. I also like to dabble in Node.js. And I'm planning to play with Go in the coming months.&lt;/p&gt;
+
+&lt;h3 id="musicandmusicnotation"&gt;Music and Music Notation&lt;/h3&gt;
+
+&lt;p&gt;I'm a drummer and music lover. MuseScore is all about music notation. Expect some posts about music in general, music notation in particular, and maybe drumming.&lt;/p&gt;
+
+&lt;h3 id="entrepeneurship"&gt;Entrepeneurship&lt;/h3&gt;
+
+&lt;p&gt;MuseScore is my first entrepeunarial endeavior. Putting in place a business model around a B2C free and open source software is challenging. I might post about this challenge and about the sheet music and music education market in general.&lt;/p&gt;
+
+&lt;h3 id="englishmainly"&gt;English mainly&lt;/h3&gt;
+
+&lt;p&gt;Maybe you didn't figure it out yet but my mother tongue is French. I'm more confortable with English for technical topics, so I will mainly blog in English.&lt;/p&gt;
+
+&lt;p&gt;Happy reading!&lt;/p&gt;</description><link>http://127.0.0.1:2368/first-post-what-to-expect/</link><guid isPermaLink="false">ff607005-dd48-47c6-ae6b-7da805d0a670</guid><category>blog</category><category>about</category><dc:creator>lasconic</dc:creator><pubDate>Wed, 03 Sep 2014 10:04:38 GMT</pubDate></item></channel></rss>

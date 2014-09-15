@@ -1,0 +1,73 @@
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title> nodejs - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Mon, 15 Sep 2014 09:52:22 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/tag/nodejs/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Free blog hosting using Ghost, Buster and GitHub Pages</title><description>&lt;p&gt;I considered several blog engines before starting this blog. First, I wanted an unexpensive and portable solution. Also, I wanted to avoid ads. I considered a self hosted &lt;a href='http://wordpress.org/' &gt;Wordpress&lt;/a&gt; but Wordpress has become a huge and complex pile of code. I'm using Markdown and git daily, so an engine based on them would be nice. I tested &lt;a href='http://jekyllrb.com/' &gt;Jekyll&lt;/a&gt; with &lt;a href='https://github.com/poole' &gt;Hyde and Lanyon&lt;/a&gt; and &lt;a href='http://octopress.org/' &gt;Octopress&lt;/a&gt; but Ruby... no thanks. I prefer Python, so I took a look to &lt;a href='http://getpelican.org/' &gt;Pelican&lt;/a&gt; but it feels less supported. So no good solution...&lt;/p&gt;
+
+&lt;p&gt;I came accross &lt;a href='https://ghost.org/download/' &gt;Ghost&lt;/a&gt; which seems to gain momentum. Ghost lets me write in Markdown syntax and is based on Node.js. The default theme looks good enough and the community support seems ok. Still, I needed a database and a Node.js instance and so a server. I'd prefer to use Github Pages instead, so static HTML pages.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://github.com/axitkhurana/buster' &gt;Buster&lt;/a&gt; to the rescue! Buster (Ghost, Buster, &lt;a href='https://www.youtube.com/watch?v=I9bNyDjczVQ' #t=12"&gt;got it&lt;/a&gt;?) is a Python script to extract static content from a running Ghost instance. OK! Sound like a plan.&lt;/p&gt;
+
+&lt;h2 id="installingghost"&gt;Installing Ghost&lt;/h2&gt;
+
+&lt;p&gt;I like to use nvm to manage the version of node I'm running. &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ nvm install 0.10.30
+$ nvm use 0.10.30
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then installing Ghost is easy enough. Download the zip from &lt;a href='https://ghost.org/download/' &gt;Ghost download page&lt;/a&gt;. Unzip it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ cd ghost
+$ npm install --production
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And run it&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ npm start
+$ open 127.0.0.1:2368/ghost/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Configure Ghost in the browser.&lt;/p&gt;
+
+&lt;h2 id="installingbuster"&gt;Installing Buster&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Install &lt;a href='http://pip.readthedocs.org/en/latest/installing.html' &gt;pip&lt;/a&gt; if necessary. &lt;/li&gt;
+&lt;li&gt;Install &lt;a href='https://github.com/axitkhurana/buster' &gt;Buster&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code&gt;$ pip install buster
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id="githubpages"&gt;GitHub pages&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Create a new repository on GitHub&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cd ghost&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;buster setup&lt;/code&gt; and enter repository address&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;buster add-domain blog.example.com&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Modify CNAME of DNS provider. 
+&lt;ul&gt;&lt;li&gt;Name: &lt;code&gt;blog&lt;/code&gt; &lt;/li&gt;
+&lt;li&gt;Value: &lt;code&gt;blog.example.com.&lt;/code&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id="worflow"&gt;Worflow&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Type article in the web interface of Ghost&lt;/li&gt;
+&lt;li&gt;When article is ready to be published &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ buster generate --domain 127.0.0.1:2368
+    $ buster preview
+    $ buster deploy
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Since you are reading this conclusion, it's running. I still need to pick a theme and add a couple of features I'm missing.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;About page&lt;/li&gt;
+&lt;li&gt;Syntax hightlighter&lt;/li&gt;
+&lt;li&gt;Analytics&lt;/li&gt;
+&lt;li&gt;Comments, probably using Disqus&lt;/li&gt;
+&lt;li&gt;Eventually a search engine but with static websites is not always easy. I will check &lt;a href='http://tapirgo.com/' &gt;Tapir&lt;/a&gt; and &lt;a href='http://www.tipue.com/search/' &gt;Tipue&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description><link>http://127.0.0.1:2368/free-blog-hosting-using-ghost-buster-and-github-pages/</link><guid isPermaLink="false">7d69aed9-af65-4228-a679-f97330cd5d75</guid><category>ghost</category><category> nodejs</category><category>install</category><category>tutorial</category><dc:creator>lasconic</dc:creator><pubDate>Fri, 05 Sep 2014 08:39:54 GMT</pubDate></item></channel></rss>
