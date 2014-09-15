@@ -1,0 +1,73 @@
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title/><description/><link/>http://127.0.0.1:2368/<generator>Ghost 0.5</generator><lastbuilddate>Mon, 15 Sep 2014 09:34:10 GMT</lastbuilddate><link href="http://127.0.0.1:2368/tag/nodejs/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title/><description>I considered several blog engines before starting this blog. First, I wanted an unexpensive and portable solution. Also, I wanted to avoid ads. I considered a self hosted <a href="http://wordpress.org/">Wordpress</a> but Wordpress has become a huge and complex pile of code. I'm using Markdown and git daily, so an engine based on them would be nice. I tested <a href="http://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/poole">Hyde and Lanyon</a> and <a href="http://octopress.org/">Octopress</a> but Ruby... no thanks. I prefer Python, so I took a look to <a href="http://getpelican.org/">Pelican</a> but it feels less supported. So no good solution...
+
+<p>I came accross <a href="https://ghost.org/download/">Ghost</a> which seems to gain momentum. Ghost lets me write in Markdown syntax and is based on Node.js. The default theme looks good enough and the community support seems ok. Still, I needed a database and a Node.js instance and so a server. I'd prefer to use Github Pages instead, so static HTML pages.</p>
+
+<p><a href="https://github.com/axitkhurana/buster">Buster</a> to the rescue! Buster (Ghost, Buster, <a href="https://www.youtube.com/watch?v=I9bNyDjczVQ">got it</a>?) is a Python script to extract static content from a running Ghost instance. OK! Sound like a plan.</p>
+
+<h2 id="installingghost">Installing Ghost</h2>
+
+<p>I like to use nvm to manage the version of node I'm running. </p>
+
+<pre><code>$ nvm install 0.10.30
+$ nvm use 0.10.30
+</code></pre>
+
+<p>Then installing Ghost is easy enough. Download the zip from <a href="https://ghost.org/download/">Ghost download page</a>. Unzip it.</p>
+
+<pre><code>$ cd ghost
+$ npm install --production
+</code></pre>
+
+<p>And run it</p>
+
+<pre><code>$ npm start
+$ open 127.0.0.1:2368/ghost/
+</code></pre>
+
+<p>Configure Ghost in the browser.</p>
+
+<h2 id="installingbuster">Installing Buster</h2>
+
+<ul>
+<li>Install <a href="http://pip.readthedocs.org/en/latest/installing.html">pip</a> if necessary. </li>
+<li>Install <a href="https://github.com/axitkhurana/buster">Buster</a></li>
+</ul>
+
+<pre><code>$ pip install buster
+</code></pre>
+
+<h2 id="githubpages">GitHub pages</h2>
+
+<ul>
+<li>Create a new repository on GitHub</li>
+<li><code>cd ghost</code></li>
+<li><code>buster setup</code> and enter repository address</li>
+<li><code>buster add-domain blog.example.com</code></li>
+<li>Modify CNAME of DNS provider. 
+<ul><li>Name: <code>blog</code> </li>
+<li>Value: <code>blog.example.com.</code></li></ul></li>
+</ul>
+
+<h2 id="worflow">Worflow</h2>
+
+<ul>
+<li>Type article in the web interface of Ghost</li>
+<li>When article is ready to be published </li>
+</ul>
+
+<pre><code>    $ buster generate --domain 127.0.0.1:2368
+    $ buster preview
+    $ buster deploy
+</code></pre>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Since you are reading this conclusion, it's running. I still need to pick a theme and add a couple of features I'm missing.</p>
+
+<ul>
+<li>About page</li>
+<li>Syntax hightlighter</li>
+<li>Analytics</li>
+<li>Comments, probably using Disqus</li>
+<li>Eventually a search engine but with static websites is not always easy. I will check <a href="http://tapirgo.com/">Tapir</a> and <a href="http://www.tipue.com/search/">Tipue</a></li>
+</ul>]]&gt;</description><link/>http://127.0.0.1:2368/free-blog-hosting-using-ghost-buster-and-github-pages/<guid ispermalink="false">7d69aed9-af65-4228-a679-f97330cd5d75</guid><category/><category/><category/><category/><creator/><pubdate>Fri, 05 Sep 2014 08:39:54 GMT</pubdate></item></channel></rss>
