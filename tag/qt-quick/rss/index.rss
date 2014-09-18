@@ -1,10 +1,10 @@
-<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Qt Quick - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Thu, 18 Sep 2014 13:32:35 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/tag/qt-quick/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>A customized busy indicator in Qt Quick</title><description>&lt;p&gt;For the &lt;a href='http://musescore.com/apps' &gt;MuseScore apps&lt;/a&gt;, I needed an easily customizable &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-controls-busyindicator.html' &gt;&lt;code&gt;BusyIndicator&lt;/code&gt;&lt;/a&gt;. The designer came up with something similar to &lt;a href='http://fgnass.github.io/spin.js/' &gt;spin.js&lt;/a&gt; but of course, we needed it in QML. &lt;/p&gt;
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Qt Quick - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Thu, 18 Sep 2014 13:34:49 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/tag/qt-quick/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>A customized busy indicator in Qt Quick</title><description>&lt;p&gt;For the &lt;a href='http://musescore.com/apps' &gt;MuseScore apps&lt;/a&gt;, I needed an easily customizable &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-controls-busyindicator.html' &gt;&lt;code&gt;BusyIndicator&lt;/code&gt;&lt;/a&gt;. The designer came up with something similar to &lt;a href='http://fgnass.github.io/spin.js/' &gt;spin.js&lt;/a&gt; but of course, we needed it in QML. &lt;/p&gt;
 
 &lt;p&gt;Here is spin.js in action: &lt;br /&gt;
 &lt;img src='http://127.0.0.1:2368/content/images/2014/Sep/spinjs.gif'  alt="" /&gt;&lt;/p&gt;
 
 &lt;p&gt;And here is the QML version. &lt;br /&gt;
-Since we can't run QML in the browser (&lt;a href='https://gitorious.org/qmlweb/pages/Home' &gt;yet?&lt;/a&gt;), I made a short video. Of course, you can just &lt;a href=""&gt;download the source code&lt;/a&gt; and run it yourself.&lt;/p&gt;
+Since we can't run QML in the browser (&lt;a href='https://gitorious.org/qmlweb/pages/Home' &gt;yet?&lt;/a&gt;), I made a short video. Of course, you can just &lt;a href='https://github.com/lasconic/CustomBusyIndicator-QML' &gt;download the source code&lt;/a&gt; and run it yourself.&lt;/p&gt;
 
 &lt;iframe width="560" height="315" src='http://www.youtube.com/embed/pn3dWPNeA2M'  frameborder="0" allowfullscreen&gt; &lt;/iframe&gt;
 
@@ -103,7 +103,7 @@ Since we can't run QML in the browser (&lt;a href='https://gitorious.org/qmlweb/
 
 &lt;h2 id="sourcecode"&gt;Source code&lt;/h2&gt;
 
-&lt;p&gt;The code is on GitHub: &lt;br /&gt;
+&lt;p&gt;The code is on GitHub: &lt;a href='https://github.com/lasconic/CustomBusyIndicator-QML' &gt;CustomBusyIndicator&lt;/a&gt; &lt;br /&gt;
 It could be that there is a better and more QML way of doing the animation. If so, let me know &lt;a href='https://twitter.com/lasconic' &gt;@lasconic&lt;/a&gt;&lt;/p&gt;</description><link>http://127.0.0.1:2368/a-customized-busy-indicator-in-qt-quick/</link><guid isPermaLink="false">5d3016a8-8350-4e3d-81d8-205a190cf415</guid><category>Qt</category><category>QML</category><category>Qt Quick</category><dc:creator>lasconic</dc:creator><pubDate>Thu, 18 Sep 2014 13:16:17 GMT</pubDate></item><item><title>How to use Google Analytics in a Qt Quick app for Android/iOS</title><description>&lt;p&gt;Even if there are other mobile analytics services such as &lt;a href='http://www.flurry.com/' &gt;Flurry&lt;/a&gt;, Google Analytics (GA) is a popular (and free) way to get insights about marketing campaigns or app usage. In this article I will explain how to implement a simple tracking of displayed screens and events in a multiplatform Qt Quick app. &lt;/p&gt;
 
 &lt;p&gt;&lt;em&gt;tl;dr&lt;/em&gt; : A sample app is available on GitHub:  &lt;a href='https://github.com/lasconic/GATutorial-QML' &gt;GATutorial-QML&lt;/a&gt;. &lt;/p&gt;
