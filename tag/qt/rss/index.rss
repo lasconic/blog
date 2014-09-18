@@ -1,4 +1,110 @@
-<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Qt - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Mon, 15 Sep 2014 10:00:13 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/tag/qt/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>How to use Google Analytics in a Qt Quick app for Android/iOS</title><description>&lt;p&gt;Even if there are other mobile analytics services such as &lt;a href='http://www.flurry.com/' &gt;Flurry&lt;/a&gt;, Google Analytics (GA) is a popular (and free) way to get insights about marketing campaigns or app usage. In this article I will explain how to implement a simple tracking of displayed screens and events in a multiplatform Qt Quick app. &lt;/p&gt;
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Qt - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Thu, 18 Sep 2014 13:32:35 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/tag/qt/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>A customized busy indicator in Qt Quick</title><description>&lt;p&gt;For the &lt;a href='http://musescore.com/apps' &gt;MuseScore apps&lt;/a&gt;, I needed an easily customizable &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-controls-busyindicator.html' &gt;&lt;code&gt;BusyIndicator&lt;/code&gt;&lt;/a&gt;. The designer came up with something similar to &lt;a href='http://fgnass.github.io/spin.js/' &gt;spin.js&lt;/a&gt; but of course, we needed it in QML. &lt;/p&gt;
+
+&lt;p&gt;Here is spin.js in action: &lt;br /&gt;
+&lt;img src='http://127.0.0.1:2368/content/images/2014/Sep/spinjs.gif'  alt="" /&gt;&lt;/p&gt;
+
+&lt;p&gt;And here is the QML version. &lt;br /&gt;
+Since we can't run QML in the browser (&lt;a href='https://gitorious.org/qmlweb/pages/Home' &gt;yet?&lt;/a&gt;), I made a short video. Of course, you can just &lt;a href=""&gt;download the source code&lt;/a&gt; and run it yourself.&lt;/p&gt;
+
+&lt;iframe width="560" height="315" src='http://www.youtube.com/embed/pn3dWPNeA2M'  frameborder="0" allowfullscreen&gt; &lt;/iframe&gt;
+
+&lt;h3 id="busyindicatorstyle"&gt;BusyIndicatorStyle&lt;/h3&gt;
+
+&lt;p&gt;Qt Quick Controls can be customized with a (ControlName)Style. For a &lt;code&gt;BusyIndicator&lt;/code&gt;, it's a &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-controls-styles-busyindicatorstyle.html' &gt;&lt;code&gt;BusyIndicatorStyle&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-javascript"&gt;BusyIndicatorStyle {  
+    id: style
+    property int lines: 11
+    property real length: 10 // % of the width of the control
+    property real width: 5 // % of the height of the control
+    property real radius: 13 // % of the width of the control
+    property real corner: 1 // between 0 and 1
+    property real speed: 100 // smaller is faster
+    property real trail: 0.6 // between 0 and 1
+    property bool clockWise: true
+
+    property real opacity: 0.7
+    property string color: "#7B756B"
+    property string highlightColor: "white"
+    property string bgColor: "black"
+
+    indicator: Rectangle {
+        color: style.bgColor
+        visible: control.running
+        Repeater {
+            id: repeat
+            model: style.lines
+            Rectangle {
+                property real factor: control.width / 200
+                color: style.color
+                opacity: style.opacity
+                Behavior on color {
+                    ColorAnimation {
+                        from: style.highlightColor
+                        duration: style.speed * style.lines * style.trail
+                    }
+                }
+                radius: style.corner * height / 2
+                width: style.length * factor
+                height: style.width * factor
+                x: control.width / 2 + style.radius * factor
+                y: control.height / 2 - height / 2
+                transform: Rotation {
+                    origin.x: -style.radius * factor
+                    origin.y: height / 2
+                    angle: index * (360 / repeat.count)
+                }
+                Timer {
+                    id: reset
+                    interval: style.speed * (style.clockWise ? index : style.lines - index)
+                    onTriggered: {
+                        parent.opacity = 1
+                        parent.color = style.highlightColor
+                        reset2.start()
+                    }
+                }
+                Timer {
+                    id: reset2
+                    interval: style.speed
+                    onTriggered: {
+                        parent.opacity = style.opacity
+                        parent.color = style.color
+                    }
+                }
+                Timer {
+                    id: globalTimer // for a complete cycle
+                    interval: style.speed * style.lines
+                    onTriggered: {
+                        reset.start()
+                    }
+                    triggeredOnStart: true
+                    repeat: true
+                }
+                Component.onCompleted: {
+                    globalTimer.start()
+                }
+            }
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I exposed the different customization parameters as QML properties. &lt;/p&gt;
+
+&lt;p&gt;Then the core of the style is a &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-repeater.html' &gt;Repeater&lt;/a&gt;. It will draw a given number of &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-rectangle.html' &gt;Rectangles&lt;/a&gt; using the color, corner radius etc... and of course a &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-rotation.html' &gt;Rotation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;To animate the spinner, I relied on 3 &lt;a href='http://qt-project.org/doc/qt-5/qml-qtqml-timer.html' &gt;Timers&lt;/a&gt; per rectangle. &lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;A global timer fires for every cycle and start a second timer. &lt;/li&gt;
+&lt;li&gt;This second timer will animate the color and opacity of the given rectangle with an interval depending on the index of the rectangle and start a new timer. &lt;/li&gt;
+&lt;li&gt;This last timer will restore the state of the rectangle to default according to the speed parameters.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id="sourcecode"&gt;Source code&lt;/h2&gt;
+
+&lt;p&gt;The code is on GitHub: &lt;br /&gt;
+It could be that there is a better and more QML way of doing the animation. If so, let me know &lt;a href='https://twitter.com/lasconic' &gt;@lasconic&lt;/a&gt;&lt;/p&gt;</description><link>http://127.0.0.1:2368/a-customized-busy-indicator-in-qt-quick/</link><guid isPermaLink="false">5d3016a8-8350-4e3d-81d8-205a190cf415</guid><category>Qt</category><category>QML</category><category>Qt Quick</category><dc:creator>lasconic</dc:creator><pubDate>Thu, 18 Sep 2014 13:16:17 GMT</pubDate></item><item><title>How to use Google Analytics in a Qt Quick app for Android/iOS</title><description>&lt;p&gt;Even if there are other mobile analytics services such as &lt;a href='http://www.flurry.com/' &gt;Flurry&lt;/a&gt;, Google Analytics (GA) is a popular (and free) way to get insights about marketing campaigns or app usage. In this article I will explain how to implement a simple tracking of displayed screens and events in a multiplatform Qt Quick app. &lt;/p&gt;
 
 &lt;p&gt;&lt;em&gt;tl;dr&lt;/em&gt; : A sample app is available on GitHub:  &lt;a href='https://github.com/lasconic/GATutorial-QML' &gt;GATutorial-QML&lt;/a&gt;. &lt;/p&gt;
 
