@@ -1,4 +1,4 @@
-<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>lasconic - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Thu, 25 Sep 2014 06:36:59 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/author/lasconic/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Use a custom icon font in QML</title><description>&lt;p&gt;When it comes to images, mobile development is facing exactly the same problem than mobile web development. Images need to scale well, have a decent file size etc.. Responsive web design often use icon fonts to solve this problem for icons. In this case, an icon font also have the advantage of limiting HTTP requests.&lt;/p&gt;
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>lasconic - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Thu, 25 Sep 2014 06:44:26 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/author/lasconic/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Use a custom icon font in QML</title><description>&lt;p&gt;When it comes to images, mobile development is facing exactly the same problem than mobile web development. Images need to scale well, have a decent file size etc.. Responsive web design often use icon fonts to solve this problem for icons. In this case, an icon font also have the advantage of limiting HTTP requests.&lt;/p&gt;
 
 &lt;p&gt;In QML, we do have the possibilities to use &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-borderimage.html' &gt;BorderImage&lt;/a&gt;, or to use SVG files. Both approaches have their merits but they also have some drawbacks. For example, currently, SVG files are not rendered correctly on retina display (&lt;a href='https://bugreports.qt-project.org/browse/QTBUG-35271' &gt;QTBUG-35271&lt;/a&gt;). BorderImage are less interesting for icons since the icon itself would not scale.&lt;/p&gt;
 
@@ -6,13 +6,13 @@
 
 &lt;h3 id="previousworkswithfontawesome"&gt;Previous works with Font Awesome&lt;/h3&gt;
 
-&lt;p&gt;&lt;a href='http://fortawesome.github.io/Font-Awesome/' &gt;Font Awesome&lt;/a&gt; is a popular icon font in web development. So popular than for oncen it's also used in QML. 2 years ago already, markg85 described how to &lt;a href='http://kdeblog.mageprojects.com/2012/11/20/using-fonts-awesome-in-qml/' &gt;Use font awesome in QML&lt;/a&gt;. Recently, Ricardo do Valle created a &lt;a href='https://github.com/ricardodovalle/font-awesome-qml' &gt;GitHub project&lt;/a&gt; to demonstrate the same approach with QML in Qt 5.3.&lt;/p&gt;
+&lt;p&gt;&lt;a href='http://fortawesome.github.io/Font-Awesome/' &gt;Font Awesome&lt;/a&gt; is a popular icon font in web development. So popular than for oncen it's also used in QML. 2 years ago, markg85 described how to &lt;a href='http://kdeblog.mageprojects.com/2012/11/20/using-fonts-awesome-in-qml/' &gt;Use font awesome in QML&lt;/a&gt;. Recently, Ricardo do Valle created a &lt;a href='https://github.com/ricardodovalle/font-awesome-qml' &gt;GitHub project&lt;/a&gt; to demonstrate the same approach with QML in Qt 5.3.&lt;/p&gt;
 
-&lt;p&gt;Here I want to quickly show how one can create his own web font and use it in QML based on the same approach.&lt;/p&gt;
+&lt;p&gt;Here I want to quickly show how one can create his own web font and use it in QML, based on the same method.&lt;/p&gt;
 
 &lt;h3 id="createafontonicomoon"&gt;Create a font on Icomoon&lt;/h3&gt;
 
-&lt;p&gt;Create a couple of icons in your favorite vector graphics editor, save as SVG and go to &lt;a href='https://icomoon.io/' &gt;Icomoon.io&lt;/a&gt;. The website is one of the numerous options available to create a web font. &lt;/p&gt;
+&lt;p&gt;Create a couple of icons in your favorite vector graphics editor, save as SVG and go to &lt;a href='https://icomoon.io/' &gt;Icomoon.io&lt;/a&gt;. The website is one of the numerous options available to create a web font. It's easy to add your icons and then create a font. You can customize codepoints, font name and so on.&lt;/p&gt;
 
 &lt;h3 id="addthefonttoaqmlapp"&gt;Add the font to a QML app&lt;/h3&gt;
 
