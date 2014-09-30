@@ -1,4 +1,137 @@
-<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>QML - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Thu, 25 Sep 2014 07:07:42 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/tag/qml/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Use a custom icon font in QML</title><description>&lt;p&gt;When it comes to images, mobile development is facing exactly the same problem than mobile web development. Images need to scale well, have a decent file size etc.. Responsive web design often use icon fonts to solve this problem for icons. In this case, an icon font also have the advantage of limiting HTTP requests.&lt;/p&gt;
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>QML - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Tue, 30 Sep 2014 16:41:50 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/tag/qml/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Share from a QML app on iOS and Android</title><description>&lt;p&gt;What if you want to add a share feature to your cross platform QML app? Share on Facebook, Twitter, Email etc...&lt;/p&gt;
+
+&lt;h2 id="qmlside"&gt;QML side&lt;/h2&gt;
+
+&lt;p&gt;We will use a custom component that will let us share a text and a URL.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-javascript"&gt;import QtQuick 2.3  
+import QtQuick.Controls 1.2  
+// Our import
+import com.lasconic 1.0
+
+ApplicationWindow {  
+    visible: true
+    width: 640
+    height: 480
+    title: qsTr("Share Utils")
+
+    //Custom component
+    ShareUtils {
+        id: shareUtils
+    }
+
+    Button {
+        id: share
+        text: "Share lasconic's blog"
+        anchors.centerIn: parent
+        onClicked: {
+            //simple call
+            shareUtils.share("Interesting blog", "http://blog.lasconic.com")
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The component needs to be registered in the &lt;code&gt;main.cpp&lt;/code&gt; of the app.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-c++"&gt;qmlRegisterType&amp;lt;ShareUtils&amp;gt; ("com.lasconic", 1, 0, "ShareUtils");
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now, of course, we need to implement the component on iOS and Android.&lt;/p&gt;
+
+&lt;h2 id="cside"&gt;C++ side&lt;/h2&gt;
+
+&lt;p&gt;The main C++ class is a just a delegate for the OS specific implementation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-c++"&gt;ShareUtils::ShareUtils(QQuickItem *parent)  
+    : QQuickItem(parent)
+{
+#if defined(Q_OS_IOS)
+    _pShareUtils = new IosShareUtils(this);
+#elif defined(Q_OS_ANDROID)
+    _pShareUtils = new AndroidShareUtils(this);
+#else
+    _pShareUtils = new PlatformShareUtils(this);
+#endif
+}
+
+void ShareUtils::share(const QString &amp;amp;text, const QUrl &amp;amp;url)  
+{
+    _pShareUtils-&amp;gt;share(text, url);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id="onandroid"&gt;On Android&lt;/h2&gt;
+
+&lt;h3 id="c"&gt;C++&lt;/h3&gt;
+
+&lt;p&gt;We will just use JNI on the C++ side to call the Java side and the Android API. The Qt AndroidExtras package is handy.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-c++"&gt;void AndroidShareUtils::share(const QString &amp;amp;text, const QUrl &amp;amp;url)  
+{
+    QAndroidJniObject jsText = QAndroidJniObject::fromString(text);
+    QAndroidJniObject jsUrl = QAndroidJniObject::fromString(url.toString());
+    QAndroidJniObject::callStaticMethod&amp;lt;void&amp;gt;("com/musescore/QShareUtils",
+                                       "share",
+                                       "(Ljava/lang/String;Ljava/lang/String;)V",
+                                       jsText.object&amp;lt;jstring&amp;gt;(), jsUrl.object&amp;lt;jstring&amp;gt;());
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the pro file, we need to add &lt;code&gt;QT += androidextras&lt;/code&gt; to be able to use &lt;code&gt;QAndroidJniObject&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id="java"&gt;Java&lt;/h3&gt;
+
+&lt;p&gt;We use QtNative to get the current activity and then it's pure Android API code. It will display all the apps that can deal with the &lt;code&gt;text/plain&lt;/code&gt; mime type. We could choose which one we want to be listed, add a subject field etc... but it's beyond the scope of this article. A good intro &lt;a href='http://android-developers.blogspot.fr/2012/02/share-with-intents.html' &gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-java"&gt;import org.qtproject.qt5.android.QtNative;
+
+public static void share(String text, String url) {  
+        if (QtNative.activity() == null)
+            return;
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, text + " " + url);
+        sendIntent.setType("text/plain");
+        QtNative.activity().startActivity(sendIntent);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id="onios"&gt;On iOS&lt;/h2&gt;
+
+&lt;p&gt;iOS is the reason why we need a custom component and it inherits &lt;code&gt;QQuickItem&lt;/code&gt;. We need to get access to the native &lt;code&gt;UIView&lt;/code&gt; to be able to present a &lt;code&gt;UIActivityViewController&lt;/code&gt;. This is only possible with &lt;code&gt;QT += gui_private&lt;/code&gt; in the pro file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-objectivec"&gt;#import &amp;lt;UIKit/UIKit.h&amp;gt;
+#import &amp;lt;QtGui/qpa/qplatformnativeinterface.h&amp;gt;
+#import &amp;lt;QGuiApplication&amp;gt;
+#import &amp;lt;QQuickWindow&amp;gt;
+
+void IosShareUtils::share(const QString &amp;amp;text, const QUrl &amp;amp;url) {
+
+    NSMutableArray *sharingItems = [NSMutableArray new];
+
+    if (!text.isEmpty()) {
+        [sharingItems addObject:text.toNSString()];
+    }
+    if (url.isValid()) {
+        [sharingItems addObject:url.toNSURL()];
+    }
+
+    // Get the UIView that backs our QQuickWindow:
+    UIView *view = static_cast&amp;lt;UIView *&amp;gt;(QGuiApplication::platformNativeInterface()-&amp;gt;nativeResourceForWindow("uiview", window()));
+
+    UIViewController *qtController = [[view window] rootViewController];
+
+    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
+    [qtController presentViewController:activityController animated:YES completion:nil];
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Et voilà, the QML app will be able to pass a text and a URL to the underlying operating system and the user can enjoy a native UI to share to the social media of his choice.&lt;/p&gt;
+
+&lt;p&gt;Full code: &lt;a href='https://github.com/lasconic/ShareUtils-QML' &gt;https://github.com/lasconic/ShareUtils-QML&lt;/a&gt;&lt;/p&gt;</description><link>http://127.0.0.1:2368/share-on-ios-and-android-using-qml/</link><guid isPermaLink="false">4dd2a81c-55ab-4ae4-9ac9-acccba0d17c6</guid><category>Qt</category><category>QML</category><category>Qt Quick</category><category>Android</category><category>iOs</category><category>Share</category><dc:creator>lasconic</dc:creator><pubDate>Tue, 30 Sep 2014 16:11:44 GMT</pubDate></item><item><title>Use a custom icon font in QML</title><description>&lt;p&gt;When it comes to images, mobile development is facing exactly the same problem than mobile web development. Images need to scale well, have a decent file size etc.. Responsive web design often use icon fonts to solve this problem for icons. In this case, an icon font also have the advantage of limiting HTTP requests.&lt;/p&gt;
 
 &lt;p&gt;In QML, we do have the possibilities to use &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-borderimage.html' &gt;BorderImage&lt;/a&gt;, or to use SVG files. Both approaches have their merits but they also have some drawbacks. For example, currently, SVG files are not rendered correctly on retina display (&lt;a href='https://bugreports.qt-project.org/browse/QTBUG-35271' &gt;QTBUG-35271&lt;/a&gt;). BorderImage are less interesting for icons since the icon itself would not scale.&lt;/p&gt;
 

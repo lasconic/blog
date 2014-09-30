@@ -1,0 +1,238 @@
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Share from a QML app on iOS and Android</title>
+    <meta name="description" content="">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="../favicon.ico">
+
+    <link rel="stylesheet" type="text/css" href="../assets/css/screen.css?v=7721d0aed3">
+    <link rel="stylesheet" type="text/css" href="../assets/css/prism.css?v=7721d0aed3">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic%7COpen+Sans:700,400">
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <meta name="generator" content="Ghost 0.5">
+<link rel="alternate" type="application/rss+xml" title="Lasconic's notes" href="../rss/index.html">
+<link rel="canonical" href="index.html">
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-11569944-3', 'auto');
+      ga('send', 'pageview');
+    </script>
+</head>
+<body class="post-template tag-qt tag-qml tag-qt-quick tag-android tag-ios tag-share">
+
+    
+
+<nav class="main-nav clearfix">
+    <a class="back-button icon-arrow-left" href="../">Home</a>
+    <a class="subscribe-button icon-feed" href="../rss/index.rss">Subscribe</a>
+</nav>
+
+<main class="content" role="main">
+
+    <article class="post tag-qt tag-qml tag-qt-quick tag-android tag-ios tag-share">
+
+        <header class="post-header">
+            <h1 class="post-title">Share from a QML app on iOS and Android</h1>
+            <section class="post-meta">
+                <time class="post-date" datetime="2014-09-30">30 September 2014</time>  on <a href="../tag/qt/">Qt</a>, <a href="../tag/qml/">QML</a>, <a href="../tag/qt-quick/">Qt Quick</a>, <a href="../tag/android/">Android</a>, <a href="../tag/ios/">iOs</a>, <a href="../tag/share/">Share</a>
+            </section>
+        </header>
+
+        <section class="post-content">
+            <p>What if you want to add a share feature to your cross platform QML app? Share on Facebook, Twitter, Email etc...</p>
+
+<h2 id="qmlside">QML side</h2>
+
+<p>We will use a custom component that will let us share a text and a URL.</p>
+
+<pre><code class="language-javascript">import QtQuick 2.3  
+import QtQuick.Controls 1.2  
+// Our import
+import com.lasconic 1.0
+
+ApplicationWindow {  
+    visible: true
+    width: 640
+    height: 480
+    title: qsTr("Share Utils")
+
+    //Custom component
+    ShareUtils {
+        id: shareUtils
+    }
+
+    Button {
+        id: share
+        text: "Share lasconic's blog"
+        anchors.centerIn: parent
+        onClicked: {
+            //simple call
+            shareUtils.share("Interesting blog", "http://blog.lasconic.com")
+        }
+    }
+}
+</code></pre>
+
+<p>The component needs to be registered in the <code>main.cpp</code> of the app.</p>
+
+<pre><code class="language-c++">qmlRegisterType&lt;ShareUtils&gt; ("com.lasconic", 1, 0, "ShareUtils");
+</code></pre>
+
+<p>Now, of course, we need to implement the component on iOS and Android.</p>
+
+<h2 id="cside">C++ side</h2>
+
+<p>The main C++ class is a just a delegate for the OS specific implementation.</p>
+
+<pre><code class="language-c++">ShareUtils::ShareUtils(QQuickItem *parent)  
+    : QQuickItem(parent)
+{
+#if defined(Q_OS_IOS)
+    _pShareUtils = new IosShareUtils(this);
+#elif defined(Q_OS_ANDROID)
+    _pShareUtils = new AndroidShareUtils(this);
+#else
+    _pShareUtils = new PlatformShareUtils(this);
+#endif
+}
+
+void ShareUtils::share(const QString &amp;text, const QUrl &amp;url)  
+{
+    _pShareUtils-&gt;share(text, url);
+}
+</code></pre>
+
+<h2 id="onandroid">On Android</h2>
+
+<h3 id="c">C++</h3>
+
+<p>We will just use JNI on the C++ side to call the Java side and the Android API. The Qt AndroidExtras package is handy.</p>
+
+<pre><code class="language-c++">void AndroidShareUtils::share(const QString &amp;text, const QUrl &amp;url)  
+{
+    QAndroidJniObject jsText = QAndroidJniObject::fromString(text);
+    QAndroidJniObject jsUrl = QAndroidJniObject::fromString(url.toString());
+    QAndroidJniObject::callStaticMethod&lt;void&gt;("com/musescore/QShareUtils",
+                                       "share",
+                                       "(Ljava/lang/String;Ljava/lang/String;)V",
+                                       jsText.object&lt;jstring&gt;(), jsUrl.object&lt;jstring&gt;());
+}
+</code></pre>
+
+<p>In the pro file, we need to add <code>QT += androidextras</code> to be able to use <code>QAndroidJniObject</code>.</p>
+
+<h3 id="java">Java</h3>
+
+<p>We use QtNative to get the current activity and then it's pure Android API code. It will display all the apps that can deal with the <code>text/plain</code> mime type. We could choose which one we want to be listed, add a subject field etc... but it's beyond the scope of this article. A good intro <a href="http://android-developers.blogspot.fr/2012/02/share-with-intents.html">here</a>.</p>
+
+<pre><code class="language-java">import org.qtproject.qt5.android.QtNative;
+
+public static void share(String text, String url) {  
+        if (QtNative.activity() == null)
+            return;
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, text + " " + url);
+        sendIntent.setType("text/plain");
+        QtNative.activity().startActivity(sendIntent);
+    }
+</code></pre>
+
+<h2 id="onios">On iOS</h2>
+
+<p>iOS is the reason why we need a custom component and it inherits <code>QQuickItem</code>. We need to get access to the native <code>UIView</code> to be able to present a <code>UIActivityViewController</code>. This is only possible with <code>QT += gui_private</code> in the pro file.</p>
+
+<pre><code class="language-objectivec">#import &lt;UIKit/UIKit.h&gt;
+#import &lt;QtGui/qpa/qplatformnativeinterface.h&gt;
+#import &lt;QGuiApplication&gt;
+#import &lt;QQuickWindow&gt;
+
+void IosShareUtils::share(const QString &amp;text, const QUrl &amp;url) {
+
+    NSMutableArray *sharingItems = [NSMutableArray new];
+
+    if (!text.isEmpty()) {
+        [sharingItems addObject:text.toNSString()];
+    }
+    if (url.isValid()) {
+        [sharingItems addObject:url.toNSURL()];
+    }
+
+    // Get the UIView that backs our QQuickWindow:
+    UIView *view = static_cast&lt;UIView *&gt;(QGuiApplication::platformNativeInterface()-&gt;nativeResourceForWindow("uiview", window()));
+
+    UIViewController *qtController = [[view window] rootViewController];
+
+    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
+    [qtController presentViewController:activityController animated:YES completion:nil];
+}
+</code></pre>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Et voilà, the QML app will be able to pass a text and a URL to the underlying operating system and the user can enjoy a native UI to share to the social media of his choice.</p>
+
+<p>Full code: <a href="https://github.com/lasconic/ShareUtils-QML">https://github.com/lasconic/ShareUtils-QML</a></p>
+        </section>
+
+        <footer class="post-footer">
+
+
+            <figure class="author-image">
+                <a class="img" href="../author/lasconic/" style="background-image: url(http://www.gravatar.com/avatar/13235ccd902ea667b2b4353eb74fc812?d=404&amp;s=250)"><span class="hidden">lasconic's Picture</span></a>
+            </figure>
+
+            <section class="author">
+                <h4><a href="../author/lasconic/">lasconic</a></h4>
+
+                    <p>Read <a href="../author/lasconic/">more posts</a> by this author.</p>
+                <div class="author-meta">
+                    
+                    
+                </div>
+            </section>
+
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="https://twitter.com/share?text=Share%20from%20a%20QML%20app%20on%20iOS%20and%20Android&amp;url=http://127.0.0.1:2368/share-on-ios-and-android-using-qml/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://127.0.0.1:2368/share-on-ios-and-android-using-qml/" onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://127.0.0.1:2368/share-on-ios-and-android-using-qml/" onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+
+        </footer>
+
+    </article>
+
+</main>
+
+
+    <footer class="site-footer clearfix">
+         <section class="copyright"><a href="../">Lasconic's notes</a> © 2014 - Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International Licence</a>.</section>
+         <section class="poweredby">Proudly published with <a href="https://ghost.org">Ghost</a></section>
+    </footer>
+
+    <script src="../public/jquery.js?v=7721d0aed3"></script>
+
+    <script type="text/javascript" src="../assets/js/jquery.fitvids.js?v=7721d0aed3"></script>
+    <script type="text/javascript" src="../assets/js/index.js?v=7721d0aed3"></script>
+    <script type="text/javascript" src="../assets/js/prism.js?v=7721d0aed3"></script>
+
+</body>
