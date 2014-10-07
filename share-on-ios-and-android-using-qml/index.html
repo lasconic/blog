@@ -11,8 +11,8 @@
 
     <link rel="shortcut icon" href="../favicon.ico">
 
-    <link rel="stylesheet" type="text/css" href="../assets/css/screen.css?v=7721d0aed3">
-    <link rel="stylesheet" type="text/css" href="../assets/css/prism.css?v=7721d0aed3">
+    <link rel="stylesheet" type="text/css" href="../assets/css/screen.css?v=c67ca91886">
+    <link rel="stylesheet" type="text/css" href="../assets/css/prism.css?v=c67ca91886">
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic%7COpen+Sans:700,400">
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -151,8 +151,6 @@ public static void share(String text, String url) {
 
 <h2 id="onios">On iOS</h2>
 
-<p>iOS is the reason why we need a custom component and it inherits <code>QQuickItem</code>. We need to get access to the native <code>UIView</code> to be able to present a <code>UIActivityViewController</code>. This is only possible with <code>QT += gui_private</code> in the pro file.</p>
-
 <pre><code class="language-objectivec">#import &lt;UIKit/UIKit.h&gt;
 #import &lt;QtGui/qpa/qplatformnativeinterface.h&gt;
 #import &lt;QGuiApplication&gt;
@@ -169,10 +167,8 @@ void IosShareUtils::share(const QString &amp;text, const QUrl &amp;url) {
         [sharingItems addObject:url.toNSURL()];
     }
 
-    // Get the UIView that backs our QQuickWindow:
-    UIView *view = static_cast&lt;UIView *&gt;(QGuiApplication::platformNativeInterface()-&gt;nativeResourceForWindow("uiview", window()));
-
-    UIViewController *qtController = [[view window] rootViewController];
+    // Get the UIViewController
+UIViewController *qtController = [[UIApplication sharedApplication].keyWindow rootViewController];
 
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
     [qtController presentViewController:activityController animated:YES completion:nil];
@@ -229,10 +225,10 @@ void IosShareUtils::share(const QString &amp;text, const QUrl &amp;url) {
          <section class="poweredby">Proudly published with <a href="https://ghost.org">Ghost</a></section>
     </footer>
 
-    <script src="../public/jquery.js?v=7721d0aed3"></script>
+    <script src="../public/jquery.js?v=c67ca91886"></script>
 
-    <script type="text/javascript" src="../assets/js/jquery.fitvids.js?v=7721d0aed3"></script>
-    <script type="text/javascript" src="../assets/js/index.js?v=7721d0aed3"></script>
-    <script type="text/javascript" src="../assets/js/prism.js?v=7721d0aed3"></script>
+    <script type="text/javascript" src="../assets/js/jquery.fitvids.js?v=c67ca91886"></script>
+    <script type="text/javascript" src="../assets/js/index.js?v=c67ca91886"></script>
+    <script type="text/javascript" src="../assets/js/prism.js?v=c67ca91886"></script>
 
 </body>
