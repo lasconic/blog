@@ -1,4 +1,48 @@
-<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>lasconic - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Fri, 19 Dec 2014 13:27:00 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/author/lasconic/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Share from a QML app on iOS and Android</title><description>&lt;p&gt;What if you want to add a share feature to your cross platform QML app? Share on Facebook, Twitter, Email etc...&lt;/p&gt;
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>lasconic - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Sun, 03 Jan 2016 17:05:11 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/author/lasconic/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Compiling Qt Android app with Docker</title><description>&lt;p&gt;&lt;img src='https://farm2.staticflickr.com/1486/24068500601_2a4cc1b0e6_o_d.png'  alt="Docker+Qt+Android" /&gt;&lt;/p&gt;
+
+&lt;p&gt;Compiling a Qt app for Android requires &lt;a href='http://doc.qt.io/qt-5/androidgs.html' &gt;several dependencies&lt;/a&gt;, you need to install Qt, the Android SDK, the Android NDK, ant and so on. If your app uses Google Analytics or other Google SDKs you need to install them. Using Docker could simplify the whole setting a lot.&lt;/p&gt;
+
+&lt;p&gt;While looking into Continuous Integration for our apps, I found this &lt;a href='https://hub.docker.com/r/rabits/qt/' &gt;almost perfect docker container&lt;/a&gt;, so I thought I should share it here. This container contains Qt 5.4, the Android SDK and NDK. It almost perfect for my purpose but it lacks some aditionnal SDKs such as the Google Play repository, so I created one with the SDKs I needed: &lt;a href='https://hub.docker.com/r/lasconic/qt/' &gt;https://hub.docker.com/r/lasconic/qt/&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id="howto"&gt;How to  &lt;/h2&gt;
+
+&lt;p&gt;With a clean Ubuntu 14.04 server&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Install Docker.
+See &lt;a href='https://docs.docker.com/engine/installation/ubuntulinux/' &gt;the guide&lt;/a&gt;  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code&gt;$ sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+$ sudo sh -c 'echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" &amp;gt;&amp;gt; /etc/apt/sources.list.d/docker.list'
+$ sudo apt-get update
+$ sudo apt-get -qq install linux-image-extra-$(uname -r)
+$ sudo apt-get -qq install docker-engine
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Get your project source and mout it in a volume&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Launch the container with an interactive shell. Of course, we could run a build script instead.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code&gt;$ sudo docker pull lasconic/qt:5.4-android
+$ sudo docker run -i -t -v /home/ubuntu/myqtproject:/source lasconic/qt:5.4-android
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Compile your project (I use gradle, not ant) and create an APK&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code&gt;mkdir ~/build  
+cd ~/build  
+qmake -r /source/myproject.pro  
+make -j2  
+mkdir ~/dist  
+make install INSTALL_ROOT=~/dist  
+androiddeployqt --input android-libmyproject.so-deployment-settings.json --output ~/dist --name myapp --deployment bundled --gradle --release  
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;From there, you can upload the APK to Google Play. I use the &lt;a href='https://github.com/Triple-T/gradle-play-publisher' &gt;"Gradle Play Publisher"&lt;/a&gt; plugin.&lt;/p&gt;</description><link>http://127.0.0.1:2368/compiling-qt-android-app-with-docker/</link><guid isPermaLink="false">21229785-11a2-49df-9e4e-4a24d2257cd4</guid><dc:creator>lasconic</dc:creator><pubDate>Sun, 03 Jan 2016 17:04:09 GMT</pubDate></item><item><title>Share from a QML app on iOS and Android</title><description>&lt;p&gt;What if you want to add a share feature to your cross platform QML app? Share on Facebook, Twitter, Email etc...&lt;/p&gt;
 
 &lt;h2 id="qmlside"&gt;QML side&lt;/h2&gt;
 
