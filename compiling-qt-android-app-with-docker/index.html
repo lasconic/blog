@@ -52,9 +52,9 @@
         <section class="post-content">
             <p><img src="https://farm2.staticflickr.com/1486/24068500601_2a4cc1b0e6_o_d.png" alt="Docker+Qt+Android"></p>
 
-<p>Compiling a Qt app for Android requires <a href="http://doc.qt.io/qt-5/androidgs.html">several dependencies</a>, you need to install Qt, the Android SDK, the Android NDK, ant and so on. If your app uses Google Analytics or other Google SDKs you need to install them. Using Docker could simplify the whole setting a lot.</p>
+<p>Compiling a Qt app for Android requires <a href="http://doc.qt.io/qt-5/androidgs.html">several dependencies</a>, you need to install Qt, the Android SDK, the Android NDK, ant and so on. If your app uses other Google SDKs you need to install them. Using Docker could simplify the whole setting a lot.</p>
 
-<p>While looking into Continuous Integration for our apps, I found this <a href="https://hub.docker.com/r/rabits/qt/">almost perfect docker container</a>, so I thought I should share it here. This container contains Qt 5.4, the Android SDK and NDK. It almost perfect for my purpose but it lacks some aditionnal SDKs such as the Google Play repository, so I created one with the SDKs I needed: <a href="https://hub.docker.com/r/lasconic/qt/">https://hub.docker.com/r/lasconic/qt/</a></p>
+<p>While looking into Continuous Integration for our apps, I found this <a href="https://hub.docker.com/r/rabits/qt/">almost perfect docker container</a>, so I thought I should share it here. This container contains Qt 5.4, the Android SDK and NDK. It almost perfect for my purpose but it lacks some aditionnal SDKs such as the Google Play SDK, so I created one with the SDKs I needed: <a href="https://hub.docker.com/r/lasconic/qt/">https://hub.docker.com/r/lasconic/qt/</a></p>
 
 <h2 id="howto">How to  </h2>
 
@@ -73,8 +73,8 @@ $ sudo apt-get -qq install docker-engine
 </code></pre>
 
 <ul>
-<li><p>Get your project source and mout it in a volume</p></li>
-<li><p>Launch the container with an interactive shell. Of course, we could run a build script instead.</p></li>
+<li><p>Get your project source</p></li>
+<li><p>Launch the container with an interactive shell and your source mounted in a volume. Of course, we could run a build script instead of compiling the project manually.</p></li>
 </ul>
 
 <pre><code>$ sudo docker pull lasconic/qt:5.4-android

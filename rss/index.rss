@@ -1,8 +1,8 @@
-<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Sun, 03 Jan 2016 17:05:11 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Compiling Qt Android app with Docker</title><description>&lt;p&gt;&lt;img src='https://farm2.staticflickr.com/1486/24068500601_2a4cc1b0e6_o_d.png'  alt="Docker+Qt+Android" /&gt;&lt;/p&gt;
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Mon, 04 Jan 2016 09:02:01 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Compiling Qt Android app with Docker</title><description>&lt;p&gt;&lt;img src='https://farm2.staticflickr.com/1486/24068500601_2a4cc1b0e6_o_d.png'  alt="Docker+Qt+Android" /&gt;&lt;/p&gt;
 
-&lt;p&gt;Compiling a Qt app for Android requires &lt;a href='http://doc.qt.io/qt-5/androidgs.html' &gt;several dependencies&lt;/a&gt;, you need to install Qt, the Android SDK, the Android NDK, ant and so on. If your app uses Google Analytics or other Google SDKs you need to install them. Using Docker could simplify the whole setting a lot.&lt;/p&gt;
+&lt;p&gt;Compiling a Qt app for Android requires &lt;a href='http://doc.qt.io/qt-5/androidgs.html' &gt;several dependencies&lt;/a&gt;, you need to install Qt, the Android SDK, the Android NDK, ant and so on. If your app uses other Google SDKs you need to install them. Using Docker could simplify the whole setting a lot.&lt;/p&gt;
 
-&lt;p&gt;While looking into Continuous Integration for our apps, I found this &lt;a href='https://hub.docker.com/r/rabits/qt/' &gt;almost perfect docker container&lt;/a&gt;, so I thought I should share it here. This container contains Qt 5.4, the Android SDK and NDK. It almost perfect for my purpose but it lacks some aditionnal SDKs such as the Google Play repository, so I created one with the SDKs I needed: &lt;a href='https://hub.docker.com/r/lasconic/qt/' &gt;https://hub.docker.com/r/lasconic/qt/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;While looking into Continuous Integration for our apps, I found this &lt;a href='https://hub.docker.com/r/rabits/qt/' &gt;almost perfect docker container&lt;/a&gt;, so I thought I should share it here. This container contains Qt 5.4, the Android SDK and NDK. It almost perfect for my purpose but it lacks some aditionnal SDKs such as the Google Play SDK, so I created one with the SDKs I needed: &lt;a href='https://hub.docker.com/r/lasconic/qt/' &gt;https://hub.docker.com/r/lasconic/qt/&lt;/a&gt;&lt;/p&gt;
 
 &lt;h2 id="howto"&gt;How to  &lt;/h2&gt;
 
@@ -21,8 +21,8 @@ $ sudo apt-get -qq install docker-engine
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;p&gt;Get your project source and mout it in a volume&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Launch the container with an interactive shell. Of course, we could run a build script instead.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Get your project source&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Launch the container with an interactive shell and your source mounted in a volume. Of course, we could run a build script instead of compiling the project manually.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;pre&gt;&lt;code&gt;$ sudo docker pull lasconic/qt:5.4-android
