@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>lasconic - Lasconic's notes</title><description>Desktop, web, mobile and beyond...</description><link>http://127.0.0.1:2368/</link><generator>Ghost 0.5</generator><lastBuildDate>Mon, 22 Apr 2019 07:30:00 GMT</lastBuildDate><atom:link href="http://127.0.0.1:2368/author/lasconic/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Compiling Qt Android app with Docker</title><description>&lt;p&gt;&lt;img src='https://farm2.staticflickr.com/1486/24068500601_2a4cc1b0e6_o_d.png'  alt="Docker+Qt+Android" /&gt;&lt;/p&gt;
+
+&lt;p&gt;Compiling a Qt app for Android requires &lt;a href='http://doc.qt.io/qt-5/androidgs.html' &gt;several dependencies&lt;/a&gt;, you need to install Qt, the Android SDK, the Android NDK, ant and so on. If your app uses other Google SDKs you need to install them. Using Docker could simplify the whole setting a lot.&lt;/p&gt;
+
+&lt;p&gt;While looking into Continuous Integration for our apps, I found this &lt;a href='https://hub.docker.com/r/rabits/qt/' &gt;almost perfect docker container&lt;/a&gt;, so I thought I should share it here. This container contains Qt 5.4, the Android SDK and NDK. It almost perfect for my purpose but it lacks some aditionnal SDKs such as the Google Play SDK, so I created one with the SDKs I needed: &lt;a href='https://hub.docker.com/r/lasconic/qt/' &gt;https://hub.docker.com/r/lasconic/qt/&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id="howto"&gt;How to  &lt;/h2&gt;
+
+&lt;p&gt;With a clean Ubuntu 14.04 server&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Install Docker.
+See &lt;a href='https://docs.docker.com/engine/installation/ubuntulinux/' &gt;the guide&lt;/a&gt;  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code&gt;$ sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+$ sudo sh -c 'echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" &amp;gt;&amp;gt; /etc/apt/sources.list.d/docker.list'
+$ sudo apt-get update
+$ sudo apt-get -qq install linux-image-extra-$(uname -r)
+$ sudo apt-get -qq install docker-engine
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Get your project source&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Launch the container with an interactive shell and your source mounted in a volume. Of course, we could run a build script instead of compiling the project manually.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code&gt;$ sudo docker pull lasconic/qt:5.4-android
+$ sudo docker run -i -t -v /home/ubuntu/myqtproject:/source lasconic/qt:5.4-android
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Compile your project (I use gradle, not ant) and create an APK&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code&gt;mkdir ~/build  
+cd ~/build  
+qmake -r /source/myproject.pro  
+make -j2  
+mkdir ~/dist  
+make install INSTALL_ROOT=~/dist  
+androiddeployqt --input android-libmyproject.so-deployment-settings.json --output ~/dist --name myapp --deployment bundled --gradle --release  
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;From there, you can upload the APK to Google Play. I use the &lt;a href='https://github.com/Triple-T/gradle-play-publisher' &gt;"Gradle Play Publisher"&lt;/a&gt; plugin.&lt;/p&gt;</description><link>http://127.0.0.1:2368/compiling-qt-android-app-with-docker/</link><guid isPermaLink="false">21229785-11a2-49df-9e4e-4a24d2257cd4</guid><dc:creator>lasconic</dc:creator><pubDate>Sun, 03 Jan 2016 17:04:09 GMT</pubDate></item><item><title>Share from a QML app on iOS and Android</title><description>&lt;p&gt;What if you want to add a share feature to your cross platform QML app? Share on Facebook, Twitter, Email etc...&lt;/p&gt;
+
+&lt;h2 id="qmlside"&gt;QML side&lt;/h2&gt;
+
+&lt;p&gt;We will use a custom component that will let us share a text and a URL.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-javascript"&gt;import QtQuick 2.3  
+import QtQuick.Controls 1.2  
+// Our import
+import com.lasconic 1.0
+
+ApplicationWindow {  
+    visible: true
+    width: 640
+    height: 480
+    title: qsTr("Share Utils")
+
+    //Custom component
+    ShareUtils {
+        id: shareUtils
+    }
+
+    Button {
+        id: share
+        text: "Share lasconic's blog"
+        anchors.centerIn: parent
+        onClicked: {
+            //simple call
+            shareUtils.share("Interesting blog", "http://blog.lasconic.com")
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The component needs to be registered in the &lt;code&gt;main.cpp&lt;/code&gt; of the app.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-c++"&gt;qmlRegisterType&amp;lt;ShareUtils&amp;gt; ("com.lasconic", 1, 0, "ShareUtils");
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now, of course, we need to implement the component on iOS and Android.&lt;/p&gt;
+
+&lt;h2 id="cside"&gt;C++ side&lt;/h2&gt;
+
+&lt;p&gt;The main C++ class is a just a delegate for the OS specific implementation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-c++"&gt;ShareUtils::ShareUtils(QQuickItem *parent)  
+    : QQuickItem(parent)
+{
+#if defined(Q_OS_IOS)
+    _pShareUtils = new IosShareUtils(this);
+#elif defined(Q_OS_ANDROID)
+    _pShareUtils = new AndroidShareUtils(this);
+#else
+    _pShareUtils = new PlatformShareUtils(this);
+#endif
+}
+
+void ShareUtils::share(const QString &amp;amp;text, const QUrl &amp;amp;url)  
+{
+    _pShareUtils-&amp;gt;share(text, url);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id="onandroid"&gt;On Android&lt;/h2&gt;
+
+&lt;h3 id="c"&gt;C++&lt;/h3&gt;
+
+&lt;p&gt;We will just use JNI on the C++ side to call the Java side and the Android API. The Qt AndroidExtras package is handy.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-c++"&gt;void AndroidShareUtils::share(const QString &amp;amp;text, const QUrl &amp;amp;url)  
+{
+    QAndroidJniObject jsText = QAndroidJniObject::fromString(text);
+    QAndroidJniObject jsUrl = QAndroidJniObject::fromString(url.toString());
+    QAndroidJniObject::callStaticMethod&amp;lt;void&amp;gt;("com/musescore/QShareUtils",
+                                       "share",
+                                       "(Ljava/lang/String;Ljava/lang/String;)V",
+                                       jsText.object&amp;lt;jstring&amp;gt;(), jsUrl.object&amp;lt;jstring&amp;gt;());
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the pro file, we need to add &lt;code&gt;QT += androidextras&lt;/code&gt; to be able to use &lt;code&gt;QAndroidJniObject&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id="java"&gt;Java&lt;/h3&gt;
+
+&lt;p&gt;We use QtNative to get the current activity and then it's pure Android API code. It will display all the apps that can deal with the &lt;code&gt;text/plain&lt;/code&gt; mime type. We could choose which one we want to be listed, add a subject field etc... but it's beyond the scope of this article. A good intro &lt;a href='http://android-developers.blogspot.fr/2012/02/share-with-intents.html' &gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-java"&gt;import org.qtproject.qt5.android.QtNative;
+
+public static void share(String text, String url) {  
+        if (QtNative.activity() == null)
+            return;
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, text + " " + url);
+        sendIntent.setType("text/plain");
+        QtNative.activity().startActivity(sendIntent);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id="onios"&gt;On iOS&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class="language-objectivec"&gt;#import &amp;lt;UIKit/UIKit.h&amp;gt;
+#import &amp;lt;QtGui/qpa/qplatformnativeinterface.h&amp;gt;
+#import &amp;lt;QGuiApplication&amp;gt;
+#import &amp;lt;QQuickWindow&amp;gt;
+
+void IosShareUtils::share(const QString &amp;amp;text, const QUrl &amp;amp;url) {
+
+    NSMutableArray *sharingItems = [NSMutableArray new];
+
+    if (!text.isEmpty()) {
+        [sharingItems addObject:text.toNSString()];
+    }
+    if (url.isValid()) {
+        [sharingItems addObject:url.toNSURL()];
+    }
+
+    // Get the UIViewController
+UIViewController *qtController = [[UIApplication sharedApplication].keyWindow rootViewController];
+
+    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
+    [qtController presentViewController:activityController animated:YES completion:nil];
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Et voilà, the QML app will be able to pass a text and a URL to the underlying operating system and the user can enjoy a native UI to share to the social media of his choice.&lt;/p&gt;
+
+&lt;p&gt;Full code: &lt;a href='https://github.com/lasconic/ShareUtils-QML' &gt;https://github.com/lasconic/ShareUtils-QML&lt;/a&gt;&lt;/p&gt;</description><link>http://127.0.0.1:2368/share-on-ios-and-android-using-qml/</link><guid isPermaLink="false">4dd2a81c-55ab-4ae4-9ac9-acccba0d17c6</guid><category>Qt</category><category>QML</category><category>Qt Quick</category><category>Android</category><category>iOs</category><category>Share</category><dc:creator>lasconic</dc:creator><pubDate>Tue, 30 Sep 2014 16:11:44 GMT</pubDate></item><item><title>Use a custom icon font in QML</title><description>&lt;p&gt;When it comes to images, mobile development is facing exactly the same problem than mobile web development. Images need to scale well, have a decent file size etc.. Responsive web design often use icon fonts to solve this problem for icons. In this case, an icon font also have the advantage of limiting HTTP requests.&lt;/p&gt;
+
+&lt;p&gt;In QML, we do have the possibilities to use &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-borderimage.html' &gt;BorderImage&lt;/a&gt;, or to use SVG files. Both approaches have their merits but they also have some drawbacks. For example, currently, SVG files are not rendered correctly on retina display (&lt;a href='https://bugreports.qt-project.org/browse/QTBUG-35271' &gt;QTBUG-35271&lt;/a&gt;). BorderImage are less interesting for icons since the icon itself would not scale.&lt;/p&gt;
+
+&lt;p&gt;Other developers used icon fonts in QML, in particular using the Font Awesome web font.&lt;/p&gt;
+
+&lt;h3 id="previousworkswithfontawesome"&gt;Previous works with Font Awesome&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href='http://fortawesome.github.io/Font-Awesome/' &gt;Font Awesome&lt;/a&gt; is a popular icon font in web development. So popular than for oncen it's also used in QML. 2 years ago, markg85 described how to &lt;a href='http://kdeblog.mageprojects.com/2012/11/20/using-fonts-awesome-in-qml/' &gt;Use font awesome in QML&lt;/a&gt;. Recently, Ricardo do Valle created a &lt;a href='https://github.com/ricardodovalle/font-awesome-qml' &gt;GitHub project&lt;/a&gt; to demonstrate the same approach with QML in Qt 5.3.&lt;/p&gt;
+
+&lt;p&gt;Here I want to quickly show how one can create his own web font and use it in QML, based on the same method.&lt;/p&gt;
+
+&lt;h3 id="createafontonicomoon"&gt;Create a font on Icomoon&lt;/h3&gt;
+
+&lt;p&gt;Create a couple of icons in your favorite vector graphics editor, save as SVG and go to &lt;a href='https://icomoon.io/' &gt;Icomoon.io&lt;/a&gt;. The website is one of the numerous options available to create a web font. It's easy to add your icons and then create a font. You can customize codepoints, font name and so on.&lt;/p&gt;
+
+&lt;h3 id="addthefonttoaqmlapp"&gt;Add the font to a QML app&lt;/h3&gt;
+
+&lt;p&gt;The QML app will use the TTF format of the font. You can grab it from the zip generated by Icomoon. We would also want to have an easy way to refer to each icon in the font to avoid the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-javascript"&gt;Label {  
+   text: "\ue601"
+   font.family: "MyFont"
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Icomoon also provide an HTML demo file. I wrote a small python script to parse it and extract a javascript file to map the codepoints with human friendly names. The script takes the path to demo.html as a command line parameter.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-python"&gt;import requests  
+import re  
+import sys
+
+from bs4 import BeautifulSoup
+
+f = open(sys.argv[1],"r")  
+data = f.read()  
+soup = BeautifulSoup(data)
+
+glyphs = soup.find_all('div', class_="glyph")
+
+print ".pragma library"  
+print "var Icon = {"  
+for g in glyphs:  
+    ##t = g.text.strip()
+    pbs = g.find_all('div', class_="pbs")
+
+    for pb in pbs:
+        variable = pb.text.strip()
+        variable =  re.sub(r'(?!^)-([a-zA-Z])', lambda m: m.group(1).upper(), variable[10:])
+        #print variable
+
+    input = g.find_all('input', class_="unit size1of2")
+
+    for i in input:
+        charcode = "\\u" + i['value']
+
+    print "      " + variable + " " * (20 - len(variable))  + ": \"" + charcode + "\","
+
+print "}"  
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The output of this script is a javascript file, &lt;code&gt;MyFont.js&lt;/code&gt; to include in a QML app. And we can then write:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-javascript"&gt;import "MyFont.js" as MyFont  
+Label {  
+   text: MyFont.Icon.logo // name of the icon
+   font.family: "MyFont"
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id="conclusion"&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;This is it. Comments or questions? &lt;a href='https://twitter.com/lasconic' &gt;@lasconic&lt;/a&gt;&lt;/p&gt;</description><link>http://127.0.0.1:2368/use-a-custom-icon-font-in-qml/</link><guid isPermaLink="false">46555739-723f-4d0f-b2cc-21ec4a4b97f5</guid><category>Qt</category><category>QML</category><category>Qt Quick</category><category>Design</category><dc:creator>lasconic</dc:creator><pubDate>Mon, 22 Sep 2014 08:39:39 GMT</pubDate></item><item><title>A customized busy indicator in Qt Quick</title><description>&lt;p&gt;For the &lt;a href='http://musescore.com/apps' &gt;MuseScore apps&lt;/a&gt;, I needed an easily customizable &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-controls-busyindicator.html' &gt;&lt;code&gt;BusyIndicator&lt;/code&gt;&lt;/a&gt;. The designer came up with something similar to &lt;a href='http://fgnass.github.io/spin.js/' &gt;spin.js&lt;/a&gt; but of course, we needed it in QML. &lt;/p&gt;
+
+&lt;p&gt;Here is spin.js in action: &lt;br /&gt;
+&lt;img src='http://127.0.0.1:2368/content/images/2014/Sep/spinjs.gif'  alt="" /&gt;&lt;/p&gt;
+
+&lt;p&gt;And here is the QML version. &lt;br /&gt;
+Since we can't run QML in the browser (&lt;a href='https://gitorious.org/qmlweb/pages/Home' &gt;yet?&lt;/a&gt;), I made a short video. Of course, you can just &lt;a href='https://github.com/lasconic/CustomBusyIndicator-QML' &gt;download the source code&lt;/a&gt; and run it yourself.&lt;/p&gt;
+
+&lt;iframe width="560" height="315" src='http://www.youtube.com/embed/pn3dWPNeA2M'  frameborder="0" allowfullscreen&gt; &lt;/iframe&gt;
+
+&lt;h3 id="busyindicatorstyle"&gt;BusyIndicatorStyle&lt;/h3&gt;
+
+&lt;p&gt;Qt Quick Controls can be customized with a (ControlName)Style. For a &lt;code&gt;BusyIndicator&lt;/code&gt;, it's a &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-controls-styles-busyindicatorstyle.html' &gt;&lt;code&gt;BusyIndicatorStyle&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-javascript"&gt;BusyIndicatorStyle {  
+    id: style
+    property int lines: 11
+    property real length: 10 // % of the width of the control
+    property real width: 5 // % of the height of the control
+    property real radius: 13 // % of the width of the control
+    property real corner: 1 // between 0 and 1
+    property real speed: 100 // smaller is faster
+    property real trail: 0.6 // between 0 and 1
+    property bool clockWise: true
+
+    property real opacity: 0.7
+    property string color: "#7B756B"
+    property string highlightColor: "white"
+    property string bgColor: "black"
+
+    indicator: Rectangle {
+        color: style.bgColor
+        visible: control.running
+        Repeater {
+            id: repeat
+            model: style.lines
+            Rectangle {
+                property real factor: control.width / 200
+                color: style.color
+                opacity: style.opacity
+                Behavior on color {
+                    ColorAnimation {
+                        from: style.highlightColor
+                        duration: style.speed * style.lines * style.trail
+                    }
+                }
+                radius: style.corner * height / 2
+                width: style.length * factor
+                height: style.width * factor
+                x: control.width / 2 + style.radius * factor
+                y: control.height / 2 - height / 2
+                transform: Rotation {
+                    origin.x: -style.radius * factor
+                    origin.y: height / 2
+                    angle: index * (360 / repeat.count)
+                }
+                Timer {
+                    id: reset
+                    interval: style.speed * (style.clockWise ? index : style.lines - index)
+                    onTriggered: {
+                        parent.opacity = 1
+                        parent.color = style.highlightColor
+                        reset2.start()
+                    }
+                }
+                Timer {
+                    id: reset2
+                    interval: style.speed
+                    onTriggered: {
+                        parent.opacity = style.opacity
+                        parent.color = style.color
+                    }
+                }
+                Timer {
+                    id: globalTimer // for a complete cycle
+                    interval: style.speed * style.lines
+                    onTriggered: {
+                        reset.start()
+                    }
+                    triggeredOnStart: true
+                    repeat: true
+                }
+                Component.onCompleted: {
+                    globalTimer.start()
+                }
+            }
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I exposed the different customization parameters as QML properties. &lt;/p&gt;
+
+&lt;p&gt;Then the core of the style is a &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-repeater.html' &gt;Repeater&lt;/a&gt;. It will draw a given number of &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-rectangle.html' &gt;Rectangles&lt;/a&gt; using the color, corner radius etc... and of course a &lt;a href='http://qt-project.org/doc/qt-5/qml-qtquick-rotation.html' &gt;Rotation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;To animate the spinner, I relied on 3 &lt;a href='http://qt-project.org/doc/qt-5/qml-qtqml-timer.html' &gt;Timers&lt;/a&gt; per rectangle. &lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;A global timer fires for every cycle and start a second timer. &lt;/li&gt;
+&lt;li&gt;This second timer will animate the color and opacity of the given rectangle with an interval depending on the index of the rectangle and start a new timer. &lt;/li&gt;
+&lt;li&gt;This last timer will restore the state of the rectangle to default according to the speed parameters.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id="sourcecode"&gt;Source code&lt;/h2&gt;
+
+&lt;p&gt;The code is on GitHub: &lt;a href='https://github.com/lasconic/CustomBusyIndicator-QML' &gt;CustomBusyIndicator&lt;/a&gt; &lt;br /&gt;
+It could be that there is a better and more QML way of doing the animation. If so, let me know &lt;a href='https://twitter.com/lasconic' &gt;@lasconic&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Edit: For a QtWidget approach, see &lt;a href='https://github.com/snowwlex/QtWaitingSpinner' &gt;https://github.com/snowwlex/QtWaitingSpinner&lt;/a&gt;&lt;/p&gt;</description><link>http://127.0.0.1:2368/a-customized-busy-indicator-in-qt-quick/</link><guid isPermaLink="false">5d3016a8-8350-4e3d-81d8-205a190cf415</guid><category>Qt</category><category>QML</category><category>Qt Quick</category><dc:creator>lasconic</dc:creator><pubDate>Thu, 18 Sep 2014 13:16:17 GMT</pubDate></item><item><title>How to use Google Analytics in a Qt Quick app for Android/iOS</title><description>&lt;p&gt;Even if there are other mobile analytics services such as &lt;a href='http://www.flurry.com/' &gt;Flurry&lt;/a&gt;, Google Analytics (GA) is a popular (and free) way to get insights about marketing campaigns or app usage. In this article I will explain how to implement a simple tracking of displayed screens and events in a multiplatform Qt Quick app. &lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;tl;dr&lt;/em&gt; : A sample app is available on GitHub:  &lt;a href='https://github.com/lasconic/GATutorial-QML' &gt;GATutorial-QML&lt;/a&gt;. &lt;/p&gt;
+
+&lt;h4 id="chooseyourway"&gt;Choose your way&lt;/h4&gt;
+
+&lt;p&gt;When integrating with third party services in a Qt Quick app, there are often two ways. &lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The API way&lt;/li&gt;
+&lt;li&gt;The native SDK way&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For GA, there is a low level API called &lt;a href='https://developers.google.com/analytics/devguides/collection/protocol/v1/' &gt;Measurement Protocol&lt;/a&gt;. When a low level API, the developer is required to write more code. Here, we would need to cache data when the user is offline, get device ID ourself etc... The advantage of using the low level API is that it's easy to make a cross platform app. Measurement protocol relies only on HTTP.&lt;/p&gt;
+
+&lt;p&gt;GA also provides SDKs for Android and iOS. Both SDKs most likely implements the Measurement Protocol but they also provide several other features such as automatic screen views tracking (but a Qt Quick app cannot use it...), caching of hits when the device is offline, getting device ID for better tracking... To sum it up, The SDKs are doing all the heavy lifting for us. Google also provide an &lt;a href='https://github.com/googleanalytics/google-analytics-plugin-for-unity' &gt;SDK for Unity&lt;/a&gt; but no Qt Quick SDK. It's a curse any Qt developer will encounter a lot... (Hopefully not for long!)&lt;/p&gt;
+
+&lt;p&gt;If you are reading this, and know about a Google Analytics Qt project, even not from Google, &lt;a href='http://twitter.com/lasconic' &gt;let me know&lt;/a&gt;, I'd love to be wrong.&lt;/p&gt;
+
+&lt;p&gt;Our app is currently only available on iOS and Android. So, I chose the SDK way with a future fallback to Measurement Protocol if necessary.&lt;/p&gt;
+
+&lt;h3 id="creatingtheappandasimpleapi"&gt;Creating the app and a simple API&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Obviously a new property and tracking ID is necessary. You can get one on Google Analytics website.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Create a C++ class we can call from QML. The class has two Q_INVOKABLE functions &lt;code&gt;sendHit&lt;/code&gt; and &lt;code&gt;sendEvent&lt;/code&gt;. Both are just calling the native implementation that we will implement later. We also define a mother class for the native implementation &lt;code&gt;PlatformGoogleAnalytics&lt;/code&gt;. Next paragraphs will describe the Android and iOS implementation. A default implementation using Measurement Protocol could be written too.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Expose the class to QML. In main.cpp, add &lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class="language-cpp"&gt;GoogleAnalytics ganalytics;  
+ganalytics.initTracker();  
+engine.rootContext()-&amp;gt;setContextProperty("gAnalytics", &amp;amp;ganalytics);  
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;in QML, to register an new screen view, just call&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class="language-javascript"&gt;gAnalytics.sendHit("myView")  
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id="androidglue"&gt;Android glue&lt;/h3&gt;
+
+&lt;p&gt;We have now a C++ class that we can call from QML. This class will now need to call Java and the Google Analytics SDK for Android.&lt;/p&gt;
+
+&lt;h5 id="setupthegoogleanalyticssdkforandroid"&gt;Setup the Google Analytics SDK for Android&lt;/h5&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Create a directory in your project named &lt;code&gt;android_data&lt;/code&gt;. &lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Add the following to your pro file &lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class="language-javascript "&gt;ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android_data  
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Qt Creator will merge the &lt;code&gt;android_data&lt;/code&gt; directory with the one provided by Qt when building.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Install the Google Analytics SDK for Android. You can find it in the maintenance tool of the SDK, in the extra section. Once installed, copy the &lt;code&gt;sdk/extras/google/google_play_services&lt;/code&gt; directory to &lt;code&gt;android_data&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;create a project.properties file in android_data and add this line&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class="language-javascript"&gt;android.library.reference.1=google-play-services_lib  
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;copy &lt;code&gt;android-support-v4.jar&lt;/code&gt; from the android SDK to "android_data/libs"&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;*Copy the &lt;code&gt;AndroidManifest.xml&lt;/code&gt; file from Qt ( &lt;code&gt;android_armv7/src/android/java/AndroidManifest.xml&lt;/code&gt;) to the &lt;code&gt;android_data&lt;/code&gt; directory in the project&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Add the following the &lt;code&gt;AndroidManifest.xml&lt;/code&gt;
+In &lt;code&gt;&amp;lt;activity&amp;gt;&lt;/code&gt;  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class="language-markup"&gt;&amp;lt;!-- Analytics --&amp;gt;  
+&amp;lt;meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/&amp;gt;  
+&amp;lt;meta-data android:name="com.google.android.gms.analytics.globalConfigResource" android:resource="@xml/analytics_global_config"/&amp;gt;  
+&amp;lt;!-- Analytics --&amp;gt;  
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;in &lt;code&gt;&amp;lt;application&amp;gt;&lt;/code&gt;  &lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-markup"&gt;&amp;lt;!-- Used for Google Play Store Campaign Measurement--&amp;gt;;  
+&amp;lt;service android:name="com.google.android.gms.analytics.CampaignTrackingService"/&amp;gt;  
+&amp;lt;receiver android:name="com.google.android.gms.analytics.CampaignTrackingReceiver" android:exported="true"&amp;gt;  
+     &amp;lt;intent-filter&amp;gt;
+            &amp;lt;action android:name="com.android.vending.INSTALL_REFERRER"/&amp;gt;
+     &amp;lt;/intent-filter&amp;gt;
+&amp;lt;/receiver&amp;gt;  
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This second part is not useful for tracking hits and events. It's used to track installation referrer. Read more about &lt;a href='https://developers.google.com/analytics/devguides/collection/android/campaigns' &gt;Campaign Measurement&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Add analytics configuration files, as described in &lt;code&gt;AndroidManifest.xml&lt;/code&gt;, in &lt;code&gt;android_data/res/xml&lt;/code&gt;. I created one for the tracker and one with global parameters. The tracker one contains the tracker ID and it needs to be change to your own value.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id="javaside"&gt;Java side&lt;/h5&gt;
+
+&lt;p&gt;I wrote a short Java class, named QGoogleAnalytics in order to call two of the function provided by the SDK. The class is very simple and has two static public functions &lt;code&gt;sendHit&lt;/code&gt; and &lt;code&gt;sendEvent&lt;/code&gt;. Let's see how we can call them from C++ via JNI.&lt;/p&gt;
+
+&lt;h5 id="cjni"&gt;C++ JNI&lt;/h5&gt;
+
+&lt;p&gt;Qt provides a very useful androidextras package to ease the writing of JNI.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;add the following to your pro file&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class="language-javascript"&gt;android {  
+  QT += androidextras
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The code to call a static method is easy enough. The C++ class inherits from &lt;code&gt;PlatformGoogleAnalytics&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class="language-cpp"&gt;void AndroidGoogleAnalytics::sendHit(const QString &amp;amp;screenName)  
+{
+  QAndroidJniObject jsScreenName = QAndroidJniObject::fromString(screenName);
+  QAndroidJniObject::callStaticMethod&amp;lt;void&amp;gt;("com/lasconic/QGoogleAnalytics", "sendHit", "(Ljava/lang/String;)V", jsScreenName.object&amp;lt;jstring&amp;gt;());
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id="iosglue"&gt;iOS glue&lt;/h3&gt;
+
+&lt;h4 id="setupthegoogleanalyticssdkforios"&gt;setup the Google Analytics SDK for iOS&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Download the &lt;a href='https://developers.google.com/analytics/devguides/collection/ios/resources' &gt;Google Analytics SDK for iOS v3&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Unzip it&lt;/li&gt;
+&lt;li&gt;Create an &lt;code&gt;ios&lt;/code&gt; directory in your project and copy the &lt;code&gt;include&lt;/code&gt; directory in it&lt;/li&gt;
+&lt;li&gt;Create a &lt;code&gt;libs&lt;/code&gt; directory and copy &lt;code&gt;libAdIdAccess.a&lt;/code&gt; and            &lt;code&gt;libGoogleAnalyticsServices.a&lt;/code&gt; in it&lt;/li&gt;
+&lt;li&gt;Modify the pro file to link these libraries and add framework dependencies.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code&gt;ios {  
+  QMAKE_LFLAGS += -framework CoreData -framework AdSupport -ObjC
+  LIBS += -L$$PWD/ios/libs -lGoogleAnalyticsServices -lAdIdAccess -lsqlite3.0
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id="objectivecglue"&gt;Objective-C glue&lt;/h4&gt;
+
+&lt;p&gt;Objective-C can be mixed with C++ more easily than Java.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;To add an Objective-C class, modify the pro files&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class="language-javascript"&gt;OBJECTIVE_SOURCES += ios/iosanalytics.mm  
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;also add a header file &lt;code&gt;iosanalytics.h&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;This class inherits &lt;code&gt;PlatformGoogleAnalytics&lt;/code&gt; and call the SDK directly. You need to change the GA tracking ID in this class. Qt provides a convenient &lt;code&gt;toNSString()&lt;/code&gt; method for &lt;code&gt;QString&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class="language-objectivec"&gt;void IosGoogleAnalytics::sendHit(const QString &amp;amp;screenName) {  
+    id&amp;lt;GAITracker&amp;gt; tracker = [[GAI sharedInstance] defaultTracker];
+    // Send a screen view
+    [tracker send:[[[GAIDictionaryBuilder createAppView] set:screenName.toNSString() forKey:kGAIScreenName] build]];
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id="conclusion"&gt;Conclusion&lt;/h4&gt;
+
+&lt;p&gt;This is a working and simple solution to integrate an iOS/Android Qt Quick app with Google Analytics. The code is available on GitHub: &lt;a href='https://github.com/lasconic/GATutorial-QML' &gt;GATutorial-QML&lt;/a&gt;. &lt;br /&gt;
+The approach would be similar for any service which provide more value in native SDKs than in its crossplatform API, or even doesn't provide a crossplatform API.&lt;/p&gt;
+
+&lt;p&gt;Of course, it's a crude example. We could expose more &lt;a href='https://developers.google.com/analytics/solutions/mobile-implementation-guide' &gt;Google Analytics features&lt;/a&gt; to QML such as e-commerce tracking. Also, if we would want to support more platforms such as desktop ones or Windows Mobile, we would need to complete the fallback to Measurement Protocol.&lt;/p&gt;
+
+&lt;p&gt;Any comment? Find me on &lt;a href='https://twitter.com/lasconic' &gt;twitter&lt;/a&gt;.&lt;/p&gt;</description><link>http://127.0.0.1:2368/how-to-use-google-analytics-in-a-qt-quick-app-for-androidios/</link><guid isPermaLink="false">cfc1bb7a-ae6f-4387-b8e0-257452a6bbda</guid><category>analytics</category><category>Qt</category><category>QML</category><category>Qt Quick</category><category>Android</category><category>iOs</category><category>mobile</category><dc:creator>lasconic</dc:creator><pubDate>Thu, 11 Sep 2014 21:33:17 GMT</pubDate></item><item><title>Free blog hosting using Ghost, Buster and GitHub Pages</title><description>&lt;p&gt;I considered several blog engines before starting this blog. First, I wanted an unexpensive and portable solution. Also, I wanted to avoid ads. I considered a self hosted &lt;a href='http://wordpress.org/' &gt;Wordpress&lt;/a&gt; but Wordpress has become a huge and complex pile of code. I'm using Markdown and git daily, so an engine based on them would be nice. I tested &lt;a href='http://jekyllrb.com/' &gt;Jekyll&lt;/a&gt; with &lt;a href='https://github.com/poole' &gt;Hyde and Lanyon&lt;/a&gt; and &lt;a href='http://octopress.org/' &gt;Octopress&lt;/a&gt; but Ruby... no thanks. I prefer Python, so I took a look to &lt;a href='http://getpelican.org/' &gt;Pelican&lt;/a&gt; but it feels less supported. So no good solution...&lt;/p&gt;
+
+&lt;p&gt;I came accross &lt;a href='https://ghost.org/download/' &gt;Ghost&lt;/a&gt; which seems to gain momentum. Ghost lets me write in Markdown syntax and is based on Node.js. The default theme looks good enough and the community support seems ok. Still, I needed a database and a Node.js instance and so a server. I'd prefer to use Github Pages instead, so static HTML pages.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://github.com/axitkhurana/buster' &gt;Buster&lt;/a&gt; to the rescue! Buster (Ghost, Buster, &lt;a href='https://www.youtube.com/watch?v=I9bNyDjczVQ' #t=12"&gt;got it&lt;/a&gt;?) is a Python script to extract static content from a running Ghost instance. OK! Sound like a plan.&lt;/p&gt;
+
+&lt;h2 id="installingghost"&gt;Installing Ghost&lt;/h2&gt;
+
+&lt;p&gt;I like to use nvm to manage the version of node I'm running. &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ nvm install 0.10.30
+$ nvm use 0.10.30
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then installing Ghost is easy enough. Download the zip from &lt;a href='https://ghost.org/download/' &gt;Ghost download page&lt;/a&gt;. Unzip it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ cd ghost
+$ npm install --production
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And run it&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ npm start
+$ open 127.0.0.1:2368/ghost/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Configure Ghost in the browser.&lt;/p&gt;
+
+&lt;h2 id="installingbuster"&gt;Installing Buster&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Install &lt;a href='http://pip.readthedocs.org/en/latest/installing.html' &gt;pip&lt;/a&gt; if necessary. &lt;/li&gt;
+&lt;li&gt;Install &lt;a href='https://github.com/axitkhurana/buster' &gt;Buster&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code&gt;$ pip install buster
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id="githubpages"&gt;GitHub pages&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Create a new repository on GitHub&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cd ghost&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;buster setup&lt;/code&gt; and enter repository address&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;buster add-domain blog.example.com&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Modify CNAME of DNS provider. 
+&lt;ul&gt;&lt;li&gt;Name: &lt;code&gt;blog&lt;/code&gt; &lt;/li&gt;
+&lt;li&gt;Value: &lt;code&gt;blog.example.com.&lt;/code&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id="worflow"&gt;Worflow&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Type article in the web interface of Ghost&lt;/li&gt;
+&lt;li&gt;When article is ready to be published &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ buster generate --domain 127.0.0.1:2368
+    $ buster preview
+    $ buster deploy
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Since you are reading this conclusion, it's running. I still need to pick a theme and add a couple of features I'm missing.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;About page&lt;/li&gt;
+&lt;li&gt;Syntax hightlighter&lt;/li&gt;
+&lt;li&gt;Analytics&lt;/li&gt;
+&lt;li&gt;Comments, probably using Disqus&lt;/li&gt;
+&lt;li&gt;Eventually a search engine but with static websites is not always easy. I will check &lt;a href='http://tapirgo.com/' &gt;Tapir&lt;/a&gt; and &lt;a href='http://www.tipue.com/search/' &gt;Tipue&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description><link>http://127.0.0.1:2368/free-blog-hosting-using-ghost-buster-and-github-pages/</link><guid isPermaLink="false">7d69aed9-af65-4228-a679-f97330cd5d75</guid><category>ghost</category><category> nodejs</category><category>install</category><category>tutorial</category><dc:creator>lasconic</dc:creator><pubDate>Fri, 05 Sep 2014 08:39:54 GMT</pubDate></item><item><title>First post, what to expect</title><description>&lt;p&gt;I started several blogs along the years. My last attempt was probably around 2011. I hope this one will last longer! So what to expect from this blog?&lt;/p&gt;
+
+&lt;h2 id="programmingandsoftwarearchitecture"&gt;Programming and software architecture&lt;/h2&gt;
+
+&lt;p&gt;I'm currently the CTO at &lt;a href='http://musescore.com/' &gt;MuseScore&lt;/a&gt;. Primarly, MuseScore is a desktop application written in C++/Qt. I'm also in charge of the development of the MuseScore mobile apps for both iOS and Android. So I will probably write about Qt, QML, C++ and mobile development.&lt;/p&gt;
+
+&lt;p&gt;MuseScore is also two websites &lt;a href='http://musescore.org/' &gt;http://musescore.org&lt;/a&gt; and &lt;a href='http://musescore.com/' &gt;http://musescore.com&lt;/a&gt;. I'm not the webmaster of these two websites, but I did work on the development of both. The two websites are made with &lt;a href='http://drupal.org/' &gt;Drupal&lt;/a&gt; and PHP. In particular, I worked on the &lt;a href='http://developers.musescore.com/' &gt;MuseScore.com API&lt;/a&gt; and on the overall architecture of MuseScore.com running on AWS. So you might expect post about Drupal, PHP, Javascript, Java and AWS services.&lt;/p&gt;
+
+&lt;p&gt;I'm learning Python which is becoming my scripting language of choice. I also like to dabble in Node.js. And I'm planning to play with Go in the coming months.&lt;/p&gt;
+
+&lt;h3 id="musicandmusicnotation"&gt;Music and Music Notation&lt;/h3&gt;
+
+&lt;p&gt;I'm a drummer and music lover. MuseScore is all about music notation. Expect some posts about music in general, music notation in particular, and maybe drumming.&lt;/p&gt;
+
+&lt;h3 id="entrepeneurship"&gt;Entrepeneurship&lt;/h3&gt;
+
+&lt;p&gt;MuseScore is my first entrepeunarial endeavior. Putting in place a business model around a B2C free and open source software is challenging. I might post about this challenge and about the sheet music and music education market in general.&lt;/p&gt;
+
+&lt;h3 id="englishmainly"&gt;English mainly&lt;/h3&gt;
+
+&lt;p&gt;Maybe you didn't figure it out yet but my mother tongue is French. I'm more confortable with English for technical topics, so I will mainly blog in English.&lt;/p&gt;
+
+&lt;p&gt;Happy reading!&lt;/p&gt;</description><link>http://127.0.0.1:2368/first-post-what-to-expect/</link><guid isPermaLink="false">ff607005-dd48-47c6-ae6b-7da805d0a670</guid><category>blog</category><category>about</category><dc:creator>lasconic</dc:creator><pubDate>Wed, 03 Sep 2014 10:04:38 GMT</pubDate></item></channel></rss></html>
